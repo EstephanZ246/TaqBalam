@@ -5,11 +5,16 @@
    Lo que contiene es para trabajar con sensor MPU6065 y módulo de obstáculos para obtener inclinación de carro y velocidad.
    Tambien tendrá un prototipo para mandar datos a una interfaz de matlab y recibir para modificar algunos parametros.
 */
+
 #include <TaqBalam.h>
 
-const float num_pin_rue = 4; // numero de pines de rueda
-const float dia_rue = 0.6;// diametro de rueda en metros
-const float dia_sen = 0.1; // diametro de circulo de sensor
+// Variables (se podran cambiar luego)
+float num_pin_rue = 4; // numero de pines de rueda
+float dia_rue = 0.6;// diametro de rueda en metros
+float dia_sen = 0.1; // diametro de circulo de sensor
+float conversion = 3.6;
+float frecuencia_de_muestreo;
+////////////////////////////
 
 
 float vel_ang; // velocidad angular
@@ -46,7 +51,6 @@ void setup() {
   timerAlarmEnable(timer);
 
   inicioMPU();// Iniciamos el módulo MPU6065
-
 }
 
 void loop() {
@@ -62,13 +66,20 @@ void loop() {
     // Interrupt handling code
     vel_ang = 2 * PI * (contador / num_pin_rue);//    Se realizan los calculos para obtener velocidad tangencial de la rueda.
     vel_rueda = vel_ang * dia_rue; // Tenemos m/s
-    vel_rueda = vel_rueda * 3.6; //tenemos km/h ///// VARIABLE A USAR 
+    vel_rueda = vel_rueda * conversion; //tenemos km/h ///// VARIABLE A USAR 
 
     contador = 0; // esto si se incluye, para reinciar contador
   }
 
 
-  /// Prototipo para mandar datos a 
+/////////////////////////////////////////////////////Reconfigurar datos con 
+
+
+///////////////////////////////////////////////////// Enviar datos a otro ESP32/////////////////
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+  
 
 
 
