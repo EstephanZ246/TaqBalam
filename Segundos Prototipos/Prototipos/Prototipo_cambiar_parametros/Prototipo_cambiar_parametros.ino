@@ -1,7 +1,6 @@
 #include "BluetoothSerial.h"
+
 BluetoothSerial ESPBLU;
-
-
 
 uint8_t datos_recibidos[10];
 float datos_convertidos[10];
@@ -9,16 +8,17 @@ bool bandera_mandar_datos = false;
 bool bandera_recibir_datos = false;
 
 
-void setup() {
-  // put your setup code here, to run once:
+uint8_t contadornum = 0;
+uint8_t contadorindex = 0;
 
+void setup() {
+  
+  conf_bluetooth(115200);
 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  conf_bluetooth(115200);
-
+  
 
 }
 
@@ -27,12 +27,7 @@ void conf_bluetooth(int BaudRate) {
   ESPBLU.begin(BaudRate);
 
   // Limpiamos arreglos
-  for (int i = 0; i < sizeof(datos_recibidos) + 1; i++) {
-    datos_recibidos[i] = 0;
-  }
-  for (int i = 0; i < sizeof(datos_convertidos) + 1; i++) {
-    datos_convertidos[i] = 0.0;
-  }
+  limpiararreglos();
 
 }
 
@@ -45,26 +40,31 @@ void recibirdatos() {
     bandera_mandar_datos = false;
   }
 
-  
-///////////// Recibir datos y guardarlos
-  if (temporal == 'N'){
-    
-  }else if (temporal == ','){
-    
-  }else if (temporal == 'B'){
-    
+
+  ///////////// Recibir datos y guardarlos
+  if (temporal == 'N') {
+    bandera_recibir_datos = true;
+    limpiararreglos();
+
+  } else if (temporal == ',') {
+
+  } else if (temporal == 'B') {
+
+    bandera_recibir_datos = false;
+    limpiararreglos();
+
   }
 
-  if (bandera_recibir_datos == true){
-    
+  if (bandera_recibir_datos == true) {
+  
   }
-////////////////////////////////////////////
+  ////////////////////////////////////////////
 
-  
-/////////////////// Guardamos valores en EEPROM
 
-//////////////////////////////////////////////
-  
+  /////////////////// Guardamos valores en EEPROM
+
+  //////////////////////////////////////////////
+
 }
 
 
@@ -87,5 +87,14 @@ void sendBLUE(int *palabra) { // Al final de cada array debe ir '\0'
     Serial.print('B');
     Serial.print('\n');
 
+  }
+}
+
+void limpiararreglos(void) {
+  for (int i = 0; i < sizeof(datos_recibidos) + 1; i++) {
+    datos_recibidos[i] = 0;
+  }
+  for (int i = 0; i < sizeof(datos_convertidos) + 1; i++) {
+    datos_convertidos[i] = 0.0;
   }
 }
