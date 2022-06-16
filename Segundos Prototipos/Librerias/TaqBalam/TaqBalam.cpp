@@ -1,5 +1,10 @@
 #include "TaqBalam.h"
 #include <Wire.h>// LIBRERIA PARA PODER USAR EL I2C
+#include "BluetoothSerial.h"
+#include "Stdlib.h"
+#include<EEPROM.h>
+
+
 
 float gyroXoffset, gyroYoffset, gyroZoffset;  ///variables para los ca
 float temp, accX, accY, accZ, gyroX, gyroY, gyroZ;
@@ -11,6 +16,19 @@ float roll, pitch, yaw;
 
 unsigned long preintervalo1 = millis();
 float intervalo1 = 0;
+
+// Bluetooth
+
+BluetoothSerial ESPBLU;
+
+char datos_recibidos[20];// arreglo guardar datos recibidos
+float datos_convertidos[10];// Guardar convertidos
+float datos_revertidos[10];// Guardar convertidos
+bool bandera_mandar_datos = false; // mandar datos
+bool bandera_recibir_datos = false;  // recibir datos
+char temporal; // temporal para guardar datos
+uint8_t contadornum = 0; // contador sirve para datos_recibidos
+uint8_t contadorindex = 0;// contador datos_convertidos
 
 
 void inicioMPU() {
@@ -109,7 +127,6 @@ void mpuupdate() {
   rawGyroY = Wire.read() << 8 | Wire.read();
   rawGyroZ = Wire.read() << 8 | Wire.read();
 
-
   temp = (rawTemp + 12412.0) / 340.0;
 
   accX = ((float)rawAccX) / 16384;
@@ -142,21 +159,19 @@ void mpuupdate() {
     angleGyroZ = 360;
   } 
 
-
   angleX = (gyroCoef * (angleX + gyroX * intervalo1)) + (accCoef * angleAccX);
   angleY = (gyroCoef * (angleY + gyroY * intervalo1)) + (accCoef * angleAccY);
   angleZ = angleGyroZ;
 
   preintervalo1 = millis();
 
-  
 
   roll = angleX;
   pitch = angleY;
   yaw = angleZ;
 
-
 }
+
 
 void sendArray(int *palabra){ // Al final de cada array debe ir '\0'
 int tamano = sizeof(palabra);
@@ -175,4 +190,127 @@ Serial.print('\n');
 Serial.print('B');
 Serial.print('\n');
           
+  }
+
+void conf_bluetooth(int BaudRate) {
+ESPBLU.begin(BaudRate);
+  
+  // Limpiamos arreglos
+  limpiararreglos();
+
+}
+
+void recibirdatos() {
+  // if (ESPBLU.read() > 0) {
+  temporal = ESPBLU.read();
+  //}
+
+  if (temporal == 'M') {
+    bandera_mandar_datos = true;
+  } 
+  if (temporal == 'O') {
+    EEPROM.get(0, datos_revertidos[0]);
+    EEPROM.get(4, datos_revertidos[1]);
+    EEPROM.get(8, datos_revertidos[2]);
+    EEPROM.get(12, datos_revertidos[3]);
+    EEPROM.get(16, datos_revertidos[4]);
+    EEPROM.get(20, datos_revertidos[5]);
+    EEPROM.get(24, datos_revertidos[6]);
+    EEPROM.get(28, datos_revertidos[7]);
+    EEPROM.get(32, datos_revertidos[8]);
+    EEPROM.get(36, datos_revertidos[9]);
+  }
+
+  ///////////// Recibir datos y guardarlos/////////////////////////////////
+  if (temporal == 'N') {
+    bandera_recibir_datos = true;
+    //limpiararreglos();
+    contadorindex = 0;
+    contadornum = 0;
+    temporal = ESPBLU.read();
+
+  } else if (temporal == ',') {
+    datos_convertidos[contadorindex] = atof(datos_recibidos);//datos_recibidos.toFloat();
+    contadorindex++;
+    contadornum = 0;
+    temporal = ESPBLU.read();
+
+    // limpiamos
+    for (int i = 0; i < sizeof(datos_recibidos); i++) {
+      datos_recibidos[i] = 0;
+    }
+
+  } else if (temporal == 'B') {
+    datos_convertidos[contadorindex] = atof(datos_recibidos);//datos_recibidos.toFloat();
+    bandera_recibir_datos = false;
+    //limpiararreglos();
+    contadorindex = 0;
+    contadornum = 0;
+
+    EEPROM.put(0, datos_convertidos[0]);
+    EEPROM.put(4, datos_convertidos[1]);
+    EEPROM.put(8, datos_convertidos[2]);
+    EEPROM.put(12, datos_convertidos[3]);
+    EEPROM.put(16, datos_convertidos[4]);
+    EEPROM.put(20, datos_convertidos[5]);
+    EEPROM.put(24, datos_convertidos[6]);
+    EEPROM.put(28, datos_convertidos[7]);
+    EEPROM.put(32, datos_convertidos[8]);
+    EEPROM.put(36, datos_convertidos[9]);
+
+  }
+
+  if (bandera_recibir_datos == true) {
+    datos_recibidos[contadornum] = temporal;
+    contadornum++;
+  }
+
+}
+void sendBLUE() {
+  if (bandera_mandar_datos == true) {
+    Serial.print('A');
+    Serial.print(datos_convertidos[0]);
+    Serial.print(',');
+    Serial.print(datos_convertidos[1]);
+    Serial.print(',');
+    Serial.print(datos_convertidos[2]);
+    Serial.print(',');
+    Serial.print(datos_convertidos[3]);
+    Serial.print(',');
+    Serial.print(datos_convertidos[4]);
+    Serial.print(',');
+    Serial.print(datos_convertidos[5]);
+    Serial.print(',');
+    Serial.print(datos_convertidos[6]);
+    Serial.print(',');
+    Serial.print(datos_convertidos[7]);
+    Serial.print(',');
+    Serial.print(datos_convertidos[8]);
+    Serial.print(',');
+    Serial.print(datos_convertidos[9]);
+    Serial.println('B');
+    bandera_mandar_datos = false;
+  }
+}
+
+void limpiararreglos(void) {
+  for (int i = 0; i < sizeof(datos_recibidos) ; i++) {
+    datos_recibidos[i] = 0;
+  }
+  for (int i = 0; i < sizeof(datos_convertidos) ; i++) {
+    datos_convertidos[i] = 0.0;
+  }
+}
+
+void cargardatos(){
+    EEPROM.get(0, datos_revertidos[0]);
+    EEPROM.get(4, datos_revertidos[1]);
+    EEPROM.get(8, datos_revertidos[2]);
+    EEPROM.get(12, datos_revertidos[3]);
+    EEPROM.get(16, datos_revertidos[4]);
+    EEPROM.get(20, datos_revertidos[5]);
+    EEPROM.get(24, datos_revertidos[6]);
+    EEPROM.get(28, datos_revertidos[7]);
+    EEPROM.get(32, datos_revertidos[8]);
+    EEPROM.get(36, datos_revertidos[9]);
   }

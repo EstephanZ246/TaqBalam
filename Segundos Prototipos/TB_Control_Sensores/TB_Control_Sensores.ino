@@ -14,7 +14,7 @@ float dia_rue = 0.6;// diametro de rueda en metros
 float dia_sen = 0.1; // diametro de circulo de sensor
 float conversion = 3.6;
 float frecuencia_de_muestreo;
-////////////////////////////
+//////////////////////////// 00.00
 
 
 float vel_ang; // velocidad angular
