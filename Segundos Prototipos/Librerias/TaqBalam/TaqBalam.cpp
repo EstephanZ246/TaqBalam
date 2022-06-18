@@ -2,7 +2,7 @@
 #include <Wire.h>// LIBRERIA PARA PODER USAR EL I2C
 #include "BluetoothSerial.h"
 #include "Stdlib.h"
-#include<EEPROM.h>
+#include <EEPROM.h>
 
 
 
@@ -16,6 +16,9 @@ float roll, pitch, yaw;
 
 unsigned long preintervalo1 = millis();
 float intervalo1 = 0;
+
+// BANDERA PARA CARGAR DATOS NUEVOS
+bool bandera_cargar = false;
 
 // Bluetooth
 
@@ -219,6 +222,7 @@ void recibirdatos() {
     EEPROM.get(28, datos_revertidos[7]);
     EEPROM.get(32, datos_revertidos[8]);
     EEPROM.get(36, datos_revertidos[9]);
+    bandera_cargar = true;
   }
 
   ///////////// Recibir datos y guardarlos/////////////////////////////////
@@ -257,6 +261,7 @@ void recibirdatos() {
     EEPROM.put(28, datos_convertidos[7]);
     EEPROM.put(32, datos_convertidos[8]);
     EEPROM.put(36, datos_convertidos[9]);
+    bandera_cargar = true;
 
   }
 

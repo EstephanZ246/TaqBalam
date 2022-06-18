@@ -18,6 +18,7 @@ void cargardatos();
 extern float roll, pitch, yaw;
 extern float datos_convertidos[10];
 extern float datos_revertidos[10];
+extern bool bandera_cargar;
 
 #endif
 
