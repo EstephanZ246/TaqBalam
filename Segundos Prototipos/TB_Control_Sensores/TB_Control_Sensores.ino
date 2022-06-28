@@ -20,7 +20,7 @@ float frecuencia_de_muestreo = 1; //Hz
 float vel_ang; // velocidad angular
 float vel_rueda;  // velocidad de la rueda
 int contador; // contador para calcular cuantas vueltas da la rueda
-const char pin = 32;// GPIO32 a este pin estará conectado el sensor
+const char pin = 4;// GPIO4 a este pin estará conectado el sensor
 volatile int interruptCounter; // Variables de la interrupcion del timer
 int totalInterruptCounter;
 //-----------------------------------------------------------------------------------------------------------------CONFIGURACIONES INTERRUPCION
