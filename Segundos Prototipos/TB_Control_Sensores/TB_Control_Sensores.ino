@@ -9,18 +9,22 @@
 #include <TaqBalam.h>
 
 //-----------------------------------------------------------------------------------------------------------------VARIABLES GLOBALES
-float num_pin_rue = 4; // numero de pines de rueda
+float num_pin_rue = 4.0; // numero de pines de rueda
 float dia_rue = 0.6;// diametro de rueda en metros
 float dia_sen = 0.1; // diametro de circulo de sensor
 float conversion = 3.6;
 float frecuencia_de_muestreo = 1; //Hz
 //////////////////////////// 00.00
 
+//arreglo para guardar datos
+
+int enviar[12];
+
 //-----------------------------------------------------------------------------------------------------------------VARIABLES PARA CALCULOS VELOCIDAD
 float vel_ang; // velocidad angular
 float vel_rueda;  // velocidad de la rueda
 int contador; // contador para calcular cuantas vueltas da la rueda
-const char pin = 4;// GPIO4 a este pin estará conectado el sensor
+const char pin = 32;// GPIO4 a este pin estará conectado el sensor
 volatile int interruptCounter; // Variables de la interrupcion del timer
 int totalInterruptCounter;
 //-----------------------------------------------------------------------------------------------------------------CONFIGURACIONES INTERRUPCION
@@ -48,11 +52,11 @@ void setup() {
 
   //-----------------------------------------------------------------------------------------------------------------
   cargardatos(); // cargar datos de la EEPROM
-  num_pin_rue = datos_revertidos[0]; // asignamos variables según corresponda
-  dia_rue = datos_revertidos[1];
-  dia_sen = datos_revertidos[2];
-  conversion = datos_revertidos[3];
-  frecuencia_de_muestreo = datos_revertidos[4];
+  /*num_pin_rue = datos_revertidos[0]; // asignamos variables según corresponda
+    dia_rue = datos_revertidos[1];
+    dia_sen = datos_revertidos[2];
+    conversion = datos_revertidos[3];
+    frecuencia_de_muestreo = datos_revertidos[4];*/
 
 
   //-----------------------------------------------------------------------------------------------------------------
@@ -60,7 +64,7 @@ void setup() {
 
   timer = timerBegin(0, 80, true); // algunas configuraciones para ajustar el timer a 1 seg
   timerAttachInterrupt(timer, &onTimer, true);
-  timerAlarmWrite(timer, frecuencia_de_muestreo, true);// interrupcion cada segundo
+  timerAlarmWrite(timer, 1000000, true);// interrupcion cada segundo
   timerAlarmEnable(timer);
 
   //-----------------------------------------------------------------------------------------------------------------
@@ -84,22 +88,48 @@ void loop() {
     portEXIT_CRITICAL(&timerMux);
 
     // Interrupt handling code
+
     vel_ang = 2 * PI * (contador / num_pin_rue);//    Se realizan los calculos para obtener velocidad tangencial de la rueda.
     vel_rueda = vel_ang * dia_rue; // Tenemos m/s
     vel_rueda = vel_rueda * conversion; //tenemos km/h ///// VARIABLE A USAR
 
     contador = 0; // esto si se incluye, para reinciar contador
+
+    // Mandar datos
+    sendArray(enviar);
+
   }
+
+
+  //-----------------------------------------------------------------------------------------------------------------GUARDAR DATOS PARA LUEGO MANDARLOS
+
+  enviar[0] = (int)vel_rueda;
+  enviar[1] = (int)roll;
+  enviar[2] = (int)pitch;
+  enviar[3] = (int)yaw;
+
+  Serial.print(vel_rueda);
+  Serial.print(" ");
+  Serial.print(roll);
+  Serial.print(" ");
+  Serial.print(pitch);
+  Serial.print(" ");
+  Serial.print(yaw);
+  Serial.println(" ");
+
+
+
+
 
   //-----------------------------------------------------------------------------------------------------------------CARGAR DATOS SI EN CASO SE HACE CAMBIO DE VARIABLES
 
   if (bandera_cargar == true) {
     cargardatos();
-    num_pin_rue = datos_revertidos[0]; // asignamos variables según corresponda
-    dia_rue = datos_revertidos[1];
-    dia_sen = datos_revertidos[2];
-    conversion = datos_revertidos[3];
-    frecuencia_de_muestreo = datos_revertidos[4];
+    /* num_pin_rue = datos_revertidos[0]; // asignamos variables según corresponda
+      dia_rue = datos_revertidos[1];
+      dia_sen = datos_revertidos[2];
+      conversion = datos_revertidos[3];
+      frecuencia_de_muestreo = datos_revertidos[4];*/
     bandera_cargar = false;
   }
 
