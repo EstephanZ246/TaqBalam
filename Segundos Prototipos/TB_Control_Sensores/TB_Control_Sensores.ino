@@ -16,9 +16,13 @@ float conversion = 3.6;
 float frecuencia_de_muestreo = 1; //Hz
 //////////////////////////// 00.00
 
+
+// posiciones
+float x,y,x_1,y_1,radio;
+
 //arreglo para guardar datos
 
-int enviar[12];
+int enviar[14];
 
 //-----------------------------------------------------------------------------------------------------------------VARIABLES PARA CALCULOS VELOCIDAD
 float vel_ang; // velocidad angular
@@ -91,13 +95,21 @@ void loop() {
 
     vel_ang = 2 * PI * (contador / num_pin_rue);//    Se realizan los calculos para obtener velocidad tangencial de la rueda.
     vel_rueda = vel_ang * dia_rue; // Tenemos m/s
-    vel_rueda = vel_rueda * conversion; //tenemos km/h ///// VARIABLE A USAR
+   // vel_rueda = vel_rueda * conversion; //tenemos km/h ///// VARIABLE A USAR
 
     contador = 0; // esto si se incluye, para reinciar contador
 
     // Mandar datos
-    sendArray(enviar);
+    //sendArray(enviar);
 
+    //calculo de posicion
+    
+    radio = vel_rueda * 1; //D=V*T
+    x = radio * cos(yaw*3.1416/180);// Componente x
+    y = radio * sin(yaw*3.1416/180);// Conponente y
+
+    x_1 = x_1 + x;// Posicion x
+    y_1 = y_1 + y;// Posicion y
   }
 
 
@@ -107,15 +119,10 @@ void loop() {
   enviar[1] = (int)roll;
   enviar[2] = (int)pitch;
   enviar[3] = (int)yaw;
-
-  Serial.print(vel_rueda);
-  Serial.print(" ");
-  Serial.print(roll);
-  Serial.print(" ");
-  Serial.print(pitch);
-  Serial.print(" ");
-  Serial.print(yaw);
-  Serial.println(" ");
+  
+  enviar[12] = (int)x_1;
+  enviar[13] = (int)y_1;
+  
 
 
 
