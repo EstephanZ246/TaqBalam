@@ -13,12 +13,12 @@ float num_pin_rue = 4.0; // numero de pines de rueda
 float dia_rue = 0.6;// diametro de rueda en metros
 float dia_sen = 0.1; // diametro de circulo de sensor
 float conversion = 3.6;
-float frecuencia_de_muestreo = 1; //Hz
+float frecuencia_de_muestreo = 100000; // 0.1seg  //1000000 1 seg
 //////////////////////////// 00.00
 
 
 // posiciones
-float x,y,x_1,y_1,radio;
+float x, y, x_1, y_1, radio;
 
 //arreglo para guardar datos
 
@@ -64,11 +64,11 @@ void setup() {
 
 
   //-----------------------------------------------------------------------------------------------------------------
-  frecuencia_de_muestreo = 1000000 / frecuencia_de_muestreo; // cálculos correspondientes para interrupcion
+ 
 
   timer = timerBegin(0, 80, true); // algunas configuraciones para ajustar el timer a 1 seg
   timerAttachInterrupt(timer, &onTimer, true);
-  timerAlarmWrite(timer, 1000000, true);// interrupcion cada segundo
+  timerAlarmWrite(timer, frecuencia_de_muestreo, true);// interrupcion cada segundo
   timerAlarmEnable(timer);
 
   //-----------------------------------------------------------------------------------------------------------------
@@ -95,21 +95,36 @@ void loop() {
 
     vel_ang = 2 * PI * (contador / num_pin_rue);//    Se realizan los calculos para obtener velocidad tangencial de la rueda.
     vel_rueda = vel_ang * dia_rue; // Tenemos m/s
-   // vel_rueda = vel_rueda * conversion; //tenemos km/h ///// VARIABLE A USAR
+    // vel_rueda = vel_rueda * conversion; //tenemos km/h ///// VARIABLE A USAR
 
     contador = 0; // esto si se incluye, para reinciar contador
 
-    // Mandar datos
-    //sendArray(enviar);
+
+
 
     //calculo de posicion
-    
-    radio = vel_rueda * 1; //D=V*T
-    x = radio * cos(yaw*3.1416/180);// Componente x
-    y = radio * sin(yaw*3.1416/180);// Conponente y
+
+    radio = vel_rueda * 0.1; //D=V*T
+    x = radio * cos(yaw * 3.1416 / 180); // Componente x
+    y = radio * sin(yaw * 3.1416 / 180); // Conponente y
 
     x_1 = x_1 + x;// Posicion x
     y_1 = y_1 + y;// Posicion y
+
+    // Mandar datos
+    //sendArray(enviar);
+    
+    Serial.print('A');
+    Serial.print('\n');
+
+     for (int i = 0; i<14; i++){
+         Serial.print(enviar[i]);
+         Serial.print('\n');
+      }
+    Serial.print('B');
+    Serial.print('\n');
+
+
   }
 
 
@@ -119,14 +134,9 @@ void loop() {
   enviar[1] = (int)roll;
   enviar[2] = (int)pitch;
   enviar[3] = (int)yaw;
-  
+
   enviar[12] = (int)x_1;
   enviar[13] = (int)y_1;
-  
-
-
-
-
 
   //-----------------------------------------------------------------------------------------------------------------CARGAR DATOS SI EN CASO SE HACE CAMBIO DE VARIABLES
 
