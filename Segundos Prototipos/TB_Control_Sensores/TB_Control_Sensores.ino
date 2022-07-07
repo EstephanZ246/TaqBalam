@@ -13,7 +13,7 @@ float num_pin_rue = 4.0; // numero de pines de rueda
 float dia_rue = 0.6;// diametro de rueda en metros
 float dia_sen = 0.1; // diametro de circulo de sensor
 float conversion = 3.6;
-float frecuencia_de_muestreo = 100000; // 0.1seg  //1000000 1 seg
+float frecuencia_de_muestreo = 1000000; // 0.1seg  //1000000 1 seg
 //////////////////////////// 00.00
 
 
@@ -104,7 +104,7 @@ void loop() {
 
     //calculo de posicion
 
-    radio = vel_rueda * 0.1; //D=V*T
+    radio = vel_rueda * 1; //D=V*T
     x = radio * cos(yaw * 3.1416 / 180); // Componente x
     y = radio * sin(yaw * 3.1416 / 180); // Conponente y
 
