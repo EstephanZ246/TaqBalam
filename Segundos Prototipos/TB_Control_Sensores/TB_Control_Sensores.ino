@@ -18,11 +18,11 @@ float frecuencia_de_muestreo = 1000000; // 0.1seg  //1000000 1 seg
 
 
 // posiciones
-float x, y, x_1, y_1, radio;
+float x, y, z, x_1, y_1, z_1, radio;
 
 //arreglo para guardar datos
 
-int enviar[14];
+int enviar[15];
 
 //-----------------------------------------------------------------------------------------------------------------VARIABLES PARA CALCULOS VELOCIDAD
 float vel_ang; // velocidad angular
@@ -64,7 +64,7 @@ void setup() {
 
 
   //-----------------------------------------------------------------------------------------------------------------
- 
+
 
   timer = timerBegin(0, 80, true); // algunas configuraciones para ajustar el timer a 1 seg
   timerAttachInterrupt(timer, &onTimer, true);
@@ -105,22 +105,24 @@ void loop() {
     //calculo de posicion
 
     radio = vel_rueda * 1; //D=V*T
-    x = radio * cos(yaw * 3.1416 / 180); // Componente x
-    y = radio * sin(yaw * 3.1416 / 180); // Conponente y
+    x = radio * sin((90 - pitch) * 3.1516 / 180) * cos(yaw * 3.1416 / 180); // Componente x
+    y = radio * sin((90 - pitch) * 3.1516 / 180) * sin(yaw * 3.1416 / 180); // Conponente y
+    z = radio * cos((90 - pitch) * 3.1516 / 180);
 
-    x_1 = x_1 + x;// Posicion x
-    y_1 = y_1 + y;// Posicion y
+    x_1 = (x_1 + x);// Posicion x
+    y_1 = (y_1 + y);// Posicion y
+    z_1 = (z_1 + z);
 
     // Mandar datos
     //sendArray(enviar);
-    
+
     Serial.print('A');
     Serial.print('\n');
 
-     for (int i = 0; i<14; i++){
-         Serial.print(enviar[i]);
-         Serial.print('\n');
-      }
+    for (int i = 0; i < 15; i++) {
+      Serial.print(enviar[i]);
+      Serial.print('\n');
+    }
     Serial.print('B');
     Serial.print('\n');
 
@@ -131,12 +133,13 @@ void loop() {
   //-----------------------------------------------------------------------------------------------------------------GUARDAR DATOS PARA LUEGO MANDARLOS
 
   enviar[0] = (int)vel_rueda;
-  enviar[1] = (int)roll;
-  enviar[2] = (int)pitch;
+  enviar[1] = (int)roll * (-1);
+  enviar[2] = (int)pitch * (-1);
   enviar[3] = (int)yaw;
 
   enviar[12] = (int)x_1;
   enviar[13] = (int)y_1;
+  enviar[14] = (int)z_1* (-1);
 
   //-----------------------------------------------------------------------------------------------------------------CARGAR DATOS SI EN CASO SE HACE CAMBIO DE VARIABLES
 
