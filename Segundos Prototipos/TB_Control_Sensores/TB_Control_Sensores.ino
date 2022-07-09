@@ -13,8 +13,13 @@ float num_pin_rue = 4.0; // numero de pines de rueda
 float dia_rue = 0.6;// diametro de rueda en metros
 float dia_sen = 0.1; // diametro de circulo de sensor
 float conversion = 3.6;
-float frecuencia_de_muestreo = 1000000; // 0.1seg  //1000000 1 seg
+float frecuencia_de_muestreo = 100000; // 0.1seg  //1000000 1 seg
 //////////////////////////// 00.00
+
+
+//Variables para contadores, enviar datos cada cierto tiempo
+
+int UNSEG = 0;
 
 
 // posiciones
@@ -22,7 +27,7 @@ float x, y, z, x_1, y_1, z_1, radio;
 
 //arreglo para guardar datos
 
-int enviar[15];
+float enviar[15];
 
 //-----------------------------------------------------------------------------------------------------------------VARIABLES PARA CALCULOS VELOCIDAD
 float vel_ang; // velocidad angular
@@ -91,20 +96,20 @@ void loop() {
     interruptCounter--;
     portEXIT_CRITICAL(&timerMux);
 
-    // Interrupt handling code
+    if (UNSEG > 10) {//Calculo de velocidad cada 1 SEG
+      vel_ang = 2 * PI * (contador / num_pin_rue);//    Se realizan los calculos para obtener velocidad tangencial de la rueda.
+      vel_rueda = vel_ang * dia_rue; // Tenemos m/s
+      // vel_rueda = vel_rueda * conversion; //tenemos km/h ///// VARIABLE A USAR
 
-    vel_ang = 2 * PI * (contador / num_pin_rue);//    Se realizan los calculos para obtener velocidad tangencial de la rueda.
-    vel_rueda = vel_ang * dia_rue; // Tenemos m/s
-    // vel_rueda = vel_rueda * conversion; //tenemos km/h ///// VARIABLE A USAR
-
-    contador = 0; // esto si se incluye, para reinciar contador
-
-
+      contador = 0; // esto si se incluye, para reinciar contador
+      UNSEG = 0;
+    }
+    UNSEG++;
 
 
     //calculo de posicion
 
-    radio = vel_rueda * 1; //D=V*T
+    radio = vel_rueda * 0.1; //D=V*T
     x = radio * sin((90 - pitch) * 3.1516 / 180) * cos(yaw * 3.1416 / 180); // Componente x
     y = radio * sin((90 - pitch) * 3.1516 / 180) * sin(yaw * 3.1416 / 180); // Conponente y
     z = radio * cos((90 - pitch) * 3.1516 / 180);
@@ -132,14 +137,14 @@ void loop() {
 
   //-----------------------------------------------------------------------------------------------------------------GUARDAR DATOS PARA LUEGO MANDARLOS
 
-  enviar[0] = (int)vel_rueda;
-  enviar[1] = (int)roll * (-1);
-  enviar[2] = (int)pitch * (-1);
-  enviar[3] = (int)yaw;
+  enviar[0] = vel_rueda;
+  enviar[1] = roll * (-1);
+  enviar[2] = pitch * (-1);
+  enviar[3] = yaw;
 
-  enviar[12] = (int)x_1;
-  enviar[13] = (int)y_1;
-  enviar[14] = (int)z_1* (-1);
+  enviar[12] = x_1;
+  enviar[13] = y_1;
+  enviar[14] = z_1 * (-1);
 
   //-----------------------------------------------------------------------------------------------------------------CARGAR DATOS SI EN CASO SE HACE CAMBIO DE VARIABLES
 
