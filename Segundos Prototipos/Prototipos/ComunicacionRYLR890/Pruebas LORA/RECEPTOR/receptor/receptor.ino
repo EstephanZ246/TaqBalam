@@ -45,8 +45,9 @@ void loop()
 
   //char ch;
   String inString;
-  while (Serial2.available())
+ /* while (Serial2.available())
   {
+
     if (Serial2.available()) {
       //inString += String(char(Serial2.read()));
       if (Serial2.read() == 'B') {
@@ -89,6 +90,21 @@ void loop()
       Serial.println(Pedal_Derecho);
 
 
+  }*/
+
+
+  while (Serial2.available())
+  {
+    if(Serial2.available()){
+    inString += String(char(Serial2.read()));
+    }
+  }
+
+  if(inString.length()>0)
+  {
+
+    Serial.println(inString);
+  
   }
 
   // mandar tiempo hacia la pantalla
